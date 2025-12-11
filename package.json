@@ -8,12 +8,12 @@
     "prisma:seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^6.19.1",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.3",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "drizzle-kit": "^0.22.8",
     "drizzle-orm": "^0.30.7",
     "express": "^4.19.2",
@@ -29,5 +29,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.1"
   }
 }
