@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Базовые модели объявляем ПЕРВЫМИ
+model Product {
+  id             Int      @id @default(autoincrement())
+  sku            String?  @unique
+  name           String
+  description    String?
+  brand          String?
+  type           String?   // synthetic, semi, mineral
+  viscosity      String?
+  volume_ml      Int?
+  application    String?   // petrol/diesel/universal
+  price          Float
+  stock          Int       @default(0)
+  images         String[]  @default([])
+  characteristics Json? 
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  OrderItems     OrderItem[]
+  favorites      Favorite[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  priceEach Float
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  phone     String?
+  name      String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+  favorites Favorite[]
+}
+
+// Модели, которые зависят от базовых - объявляем ПОСЛЕ
+model Favorite {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  orderNumber     String      @unique
+  userId          Int?
+  user            User?       @relation(fields: [userId], references: [id])
+  contactName     String?
+  phone           String
+  email           String?
+  deliveryMethod  String?     @default("pickup")
+  deliveryAddress Json?       // { city, street, house, apartment, comment }
+  paymentMethod   String?     @default("card")
+  totalAmount     Float
+  status          String      @default("new") // new, processing, shipped, delivered, cancelled
+  trackingNumber  String?     @unique
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([trackingNumber])
+  @@index([status])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // будет храниться хеш
+  email     String   @unique
+  role      String   @default("manager") // admin, manager
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([isActive])
+}
